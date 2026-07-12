@@ -17,7 +17,7 @@ pub mod ReadAsFitted.ReadTestSheet {
     use SheetIO.Usermodel.Sheet
     use SheetIO.Common.CellAddress
     use ReadAsFitted.Base.{TestHeader, RawAsFittedCircuit}
-    use SheetIOExtras.{getCellStringValue, addr}
+    use SheetIOExtras.{getCellStringValue, addr, cs_r}
 
 
     pub def parseTestSheet(fileName: String, checklistDate: String): List[RawAsFittedCircuit] \ Sheet = 
@@ -83,108 +83,70 @@ pub mod ReadAsFitted.ReadTestSheet {
         }
  
     def readCircuit(col: String, header: TestHeader): Option[RawAsFittedCircuit] \ Sheet = 
-        ?TODO
-
-        // {
-        //     var cableNum = ws.Cell(10, col).GetString();
-        //     var fedFrom = ws.Cell(11, col).GetString();
-        //     var circuitRefAndPhase = ws.Cell(12, col).GetString();
+        let cableNum = getCellStringValue(cs_r(col, 10));
+        let fedFrom = getCellStringValue(cs_r(col, 11));
+        let circuitRefAndPhase = getCellStringValue(cs_r(col, 12));
             
-        //     if (cableNum == "" && fedFrom == "" && circuitRefAndPhase == "")
-        //     {
-        //         return null;
-        //     } 
-        //     else
-        //     {
-        //         return new AsFittedCircuit
-        //         (
-        //             FileName: header.FileName, 
-        //             TabName: header.TabName, 
-        //             ChecklistYear: header.ChecklistDate.HasValue ? header.ChecklistDate.Value.Year : 1970,
-        //             SiteName: header.SiteName,
-        //             DbOrPanelNumber: header.DbOrPanelNumber, 
-        //             HeaderTestDate: header.TestDate, 
-        //             SheetNumber: header.SheetNumber, 
-        //             AibRef: header.AibRef,
-        //             TpOrSp: header.TpOrSp,
-        //             Location: header.Location, 
-        //             DbOrPanelIncomerDetails: header.DbOrPanelIncomerDetails,
-        //             CircuitColumn: col,
-        //             CableNum: cableNum, 
-        //             FedFrom: fedFrom, 
-        //             CircuitRefAndPhase: circuitRefAndPhase,
-        //             CircuitDescription: ws.Cell(13, col).GetString(),
-        //             CircuitType: ws.Cell(14, col).GetString(),
-        //             CableType: ws.Cell(15, col).GetString(),
-        //             InstallationMethod: ws.Cell(16, col).GetString(), 
-        //             CableLength: ws.Cell(17, col).GetString(),
-        //             NumOfCoresCSA: ws.Cell(18, col).GetString(),
-        //             CircuitBreakerOrFuseRating: ws.Cell(26, col).GetString(),
-        //             CircuitBreakerBSAndTypeNum: ws.Cell(27, col).GetString(),
-        //             CircuitBreakerManufacturerAndRefNum: ws.Cell(28, col).GetString(),
-        //             RCDManufacturerAndType: ws.Cell(31, col).GetString(),
-        //             Load: ws.Cell(34, col).GetString(),
-        //             RatingKW: ws.Cell(35, col).GetString(),
-        //             FullLoadCurrentA: ws.Cell(36, col).GetString(),
-        //             CircuitVoltageV: ws.Cell(58, col).GetString(),
-        //             CircuitCurrentA: ws.Cell(59, col).GetString(),
-        //             TestDate: ws.Cell(60, col).GetString(),
-        //             Comments: ws.Cell(61, col).GetString()
-        //         );
-        //     }
-        // }
+        if (cableNum == "" and fedFrom == "" and circuitRefAndPhase == "")
+            None
+        else
+            Some({
+                +circuitColumn = col,
+                +cableNum = cableNum, 
+                +fedFrom = fedFrom, 
+                +circuitRefAndPhase = circuitRefAndPhase,
+                +circuitDescription = getCellStringValue(cs_r(col, 13)),
+                +circuitType = getCellStringValue(cs_r(col, 14)),
+                +cableType = getCellStringValue(cs_r(col, 15)),
+                +installationMethod = getCellStringValue(cs_r(col, 16)), 
+                +cableLength = getCellStringValue(cs_r(col, 17)),
+                +numOfCoresCSA = getCellStringValue(cs_r(col, 18)),
+                +circuitBreakerOrFuseRating = getCellStringValue(cs_r(col, 26)),
+                +circuitBreakerBSAndTypeNum = getCellStringValue(cs_r(col, 27)),
+                +circuitBreakerManufacturerAndRefNum = getCellStringValue(cs_r(col, 28)),
+                +rcdManufacturerAndType = getCellStringValue(cs_r(col, 31)),
+                +load = getCellStringValue(cs_r(col, 34)),
+                +ratingKW = getCellStringValue(cs_r(col, 35)),
+                +fullLoadCurrentA = getCellStringValue(cs_r(col, 36)),
+                +circuitVoltageV = getCellStringValue(cs_r(col, 58)),
+                +circuitCurrentA = getCellStringValue(cs_r(col, 59)),
+                +testDate = getCellStringValue(cs_r(col, 60)),
+                +comments = getCellStringValue(cs_r(col, 61))
+                | header
+            })
 
         def readOldFormatCircuit(col: String, header: TestHeader): Option[RawAsFittedCircuit] \ Sheet =
-            ?TODO
-        // {
-        //     var cableNum = ws.Cell(6, col).GetString();
-        //     var fedFrom = ws.Cell(7, col).GetString();
-        //     var circuitRefAndPhase = ws.Cell(8, col).GetString();
+            let cableNum = getCellStringValue(cs_r(col, 6));
+            let fedFrom = getCellStringValue(cs_r(col, 7));
+            let circuitRefAndPhase = getCellStringValue(cs_r(col, 8));
             
-        //     if (cableNum == "" && fedFrom == "" && circuitRefAndPhase == "")
-        //     {
-        //         return null;
-        //     } 
-        //     else
-        //     {
-        //         return new AsFittedCircuit
-        //         (
-        //             FileName: header.FileName, 
-        //             TabName: header.TabName, 
-        //             ChecklistYear: header.ChecklistDate.HasValue ? header.ChecklistDate.Value.Year : 1970,
-        //             SiteName: header.SiteName,
-        //             DbOrPanelNumber: header.DbOrPanelNumber, 
-        //             HeaderTestDate: header.TestDate, 
-        //             SheetNumber: header.SheetNumber, 
-        //             AibRef: header.AibRef,
-        //             TpOrSp: header.TpOrSp,
-        //             Location: header.Location, 
-        //             DbOrPanelIncomerDetails: header.DbOrPanelIncomerDetails,
-        //             CircuitColumn: col,
-        //             CableNum: cableNum, 
-        //             FedFrom: fedFrom, 
-        //             CircuitRefAndPhase: circuitRefAndPhase,
-        //             CircuitDescription: ws.Cell(9, col).GetString(),
-        //             CircuitType: ws.Cell(10, col).GetString(),
-        //             CableType: ws.Cell(11, col).GetString(),
-        //             InstallationMethod: ws.Cell(12, col).GetString(), 
-        //             CableLength: ws.Cell(13, col).GetString(),
-        //             NumOfCoresCSA: ws.Cell(14, col).GetString(),
-        //             CircuitBreakerOrFuseRating: ws.Cell(22, col).GetString(),
-        //             CircuitBreakerBSAndTypeNum: ws.Cell(23, col).GetString(),
-        //             CircuitBreakerManufacturerAndRefNum: ws.Cell(24, col).GetString(),
-        //             RCDManufacturerAndType: ws.Cell(27, col).GetString(),
-        //             Load: ws.Cell(30, col).GetString(),
-        //             RatingKW: ws.Cell(31, col).GetString(),
-        //             FullLoadCurrentA: ws.Cell(32, col).GetString(),
-        //             CircuitVoltageV: ws.Cell(56, col).GetString(),
-        //             CircuitCurrentA: ws.Cell(57, col).GetString(),
-        //             TestDate: ws.Cell(58, col).GetString(),
-        //             Comments: ws.Cell(59, col).GetString()
-        //         );
-        //     }
-        // }
-
+            if (cableNum == "" and fedFrom == "" and circuitRefAndPhase == "")
+                None
+            else
+                Some({
+                    +circuitColumn = col,
+                    +cableNum = cableNum, 
+                    +fedFrom = fedFrom, 
+                    +circuitRefAndPhase = circuitRefAndPhase,
+                    +circuitDescription = getCellStringValue(cs_r(col, 9)),
+                    +circuitType = getCellStringValue(cs_r(col, 10)),
+                    +cableType = getCellStringValue(cs_r(col, 11)),
+                    +installationMethod = getCellStringValue(cs_r(col, 12)), 
+                    +cableLength = getCellStringValue(cs_r(col, 13)),
+                    +numOfCoresCSA = getCellStringValue(cs_r(col, 14)),
+                    +circuitBreakerOrFuseRating = getCellStringValue(cs_r(col, 22)),
+                    +circuitBreakerBSAndTypeNum = getCellStringValue(cs_r(col, 23)),
+                    +circuitBreakerManufacturerAndRefNum = getCellStringValue(cs_r(col, 24)),
+                    +rcdManufacturerAndType = getCellStringValue(cs_r(col, 27)),
+                    +load = getCellStringValue(cs_r(col, 30)),
+                    +ratingKW = getCellStringValue(cs_r(col, 31)),
+                    +fullLoadCurrentA = getCellStringValue(cs_r(col, 32)),
+                    +circuitVoltageV = getCellStringValue(cs_r(col, 56)),
+                    +circuitCurrentA = getCellStringValue(cs_r(col, 57)),
+                    +testDate = getCellStringValue(cs_r(col, 58)),
+                    +comments = getCellStringValue(cs_r(col, 59))
+                    | header
+            })
 
 
 }

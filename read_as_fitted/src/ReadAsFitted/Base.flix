@@ -67,7 +67,7 @@ pub mod ReadAsFitted.Base {
         comments = String
     }
 
-    pub def toJson(x: RawAsFittedCircuit): Json = 
+    pub def circuitToJson(x: RawAsFittedCircuit): Json = 
         JObject(Map#{
             "file_name" => ToJson.toJson(x#fileName),
             "sheet_name" => ToJson.toJson(x#tabName),

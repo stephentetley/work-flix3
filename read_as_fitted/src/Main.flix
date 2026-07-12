@@ -22,8 +22,8 @@ pub def main(): Unit \ IO =
             let n = Workbook.getNumberOfSheets();
             println("Number of sheets: ${n}");
             Workbook.withEachSheet(_ -> {
-                let ans = ReadAsFitted.ReadTestSheet.readHeader(path, "1970");
-                println(ans#tabName)
+                let ans = ReadAsFitted.ReadTestSheet.parseTestSheet(path, "1970");
+                List.forEach(ReadAsFitted.Base.circuitToJson >> println, ans)
             })
         } with SheetIO.Usermodel.Workbook.runReadOnlyXssf(path, None);   
     println(step);
