@@ -15,6 +15,7 @@
 
 pub mod SheetIOExtras {
 
+    use EffectExtras.Alt
     use SheetIO.Usermodel.Sheet
     use SheetIO.Common.CellAddress
 
@@ -37,6 +38,8 @@ pub mod SheetIOExtras {
     pub def cs_r(c: String, r: Int32): CellAddress = CellAddress.createFromString("${c}${r}")
 
 
+    pub def alt_runWithDefault(d: a, f: Unit -> a \ ef): a \ ef - Alt =
+        EffectExtras.Alt.handleWithResult(f)() |> Result.getWithDefault(d)
 
     /// SheetIO TODO - must make this simple
     pub def getCellStringValue(cellAddr: CellAddress): String \ Sheet = 

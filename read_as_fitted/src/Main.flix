@@ -19,10 +19,11 @@ pub def main(): Unit \ IO =
     let path = "../../test_data/as_fitted/test1_as_fitted.xlsx";
     SheetIOExtras.setMinInflateRatio(-1.0f64);
     let step = run { 
+            let checklistDate = ReadAsFitted.ReadGeneralChecklist.getCheckListDateString();
             let n = Workbook.getNumberOfSheets();
             println("Number of sheets: ${n}");
             Workbook.withEachSheet(_ -> {
-                let ans = ReadAsFitted.ReadTestSheet.parseTestSheet(path, "1970");
+                let ans = ReadAsFitted.ReadTestSheet.parseTestSheet(path, checklistDate);
                 List.forEach(ReadAsFitted.Base.circuitToJson >> println, ans)
             })
         } with SheetIO.Usermodel.Workbook.runReadOnlyXssf(path, None);   
