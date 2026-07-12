@@ -18,6 +18,20 @@ pub mod ReadAsFitted.Base {
     use Util.Json.Json.{JObject}
     use Util.Json.ToJson
 
+    pub type alias TestHeader[r: RecordRow] = {
+        fileName = String,
+        tabName = String,
+        checklistYear = Int32,
+        siteName = String,
+        dbOrPanelNumber = String,
+        headerTestDate = String,
+        sheetNumber = String,
+        aibRef = String,
+        tpOrSp = String,
+        location = String,
+        dbOrPanelIncomerDetails = String | r
+    }
+
     pub type alias RawAsFittedCircuit = {
         fileName = String,
         tabName = String,
