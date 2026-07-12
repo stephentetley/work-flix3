@@ -22,7 +22,8 @@ pub def main(): Unit \ IO =
             let n = Workbook.getNumberOfSheets();
             println("Number of sheets: ${n}");
             Workbook.withEachSheet(_ -> {
-                ReadAsFitted.ReadTestSheet.readHeader()
+                let ans = ReadAsFitted.ReadTestSheet.readHeader(path, "1970");
+                println(ans#tabName)
             })
         } with SheetIO.Usermodel.Workbook.runReadOnlyXssf(path, None);   
     println(step);

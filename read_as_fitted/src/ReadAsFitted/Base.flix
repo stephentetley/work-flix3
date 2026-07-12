@@ -18,10 +18,10 @@ pub mod ReadAsFitted.Base {
     use Util.Json.Json.{JObject}
     use Util.Json.ToJson
 
-    pub type alias TestHeader[r: RecordRow] = {
+    pub type alias TestHeader = {
         fileName = String,
         tabName = String,
-        checklistYear = Int32,
+        checklistDate = String,
         siteName = String,
         dbOrPanelNumber = String,
         headerTestDate = String,
@@ -29,13 +29,13 @@ pub mod ReadAsFitted.Base {
         aibRef = String,
         tpOrSp = String,
         location = String,
-        dbOrPanelIncomerDetails = String | r
+        dbOrPanelIncomerDetails = String
     }
 
     pub type alias RawAsFittedCircuit = {
         fileName = String,
         tabName = String,
-        checklistYear = Int32,
+        checklistDate = String,
         siteName = String,
         dbOrPanelNumber = String,
         headerTestDate = String,
@@ -71,7 +71,7 @@ pub mod ReadAsFitted.Base {
         JObject(Map#{
             "file_name" => ToJson.toJson(x#fileName),
             "sheet_name" => ToJson.toJson(x#tabName),
-            "checklist_year" => ToJson.toJson(x#checklistYear),
+            "checklist_date" => ToJson.toJson(x#checklistDate),
             "site_name" => ToJson.toJson(x#siteName),
             "db_or_panel_number" => ToJson.toJson(x#dbOrPanelNumber),
             "header_test_date" => ToJson.toJson(x#headerTestDate),
