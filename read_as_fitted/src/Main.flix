@@ -1,3 +1,4 @@
+use Util.Json.ToJson
 // Copyright 2026 Stephen Tetley
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +15,28 @@
 
 use SheetIO.Usermodel.Workbook.Workbook
 
+use Util.Json
+
 pub def main(): Unit \ IO = 
     println("ReadAsFitted");
     let path = "../../test_data/as_fitted/test1_as_fitted.xlsx";
+    let outpath = Interop.Path.swapExtension("json", path);
+    println(outpath);
     SheetIOExtras.setMinInflateRatio(-1.0f64);
-    let step = run { 
+    let payload = run { 
             let checklistDate = ReadAsFitted.ReadGeneralChecklist.getCheckListDateString();
             let n = Workbook.getNumberOfSheets();
             println("Number of sheets: ${n}");
-            Workbook.withEachSheet(_ -> {
+            Workbook.foldSheets(ac -> {
                 let ans = ReadAsFitted.ReadTestSheet.parseTestSheet(path, checklistDate);
-                List.forEach(ReadAsFitted.Base.circuitToJson >> println, ans)
-            })
+                let ans1 = List.map(ReadAsFitted.Base.circuitToJson, ans);
+                ac ::: ans1
+            }, Nil) |> Result.map(ToJson.toJson)
         } with SheetIO.Usermodel.Workbook.runReadOnlyXssf(path, None);   
-    println(step);
-    ()
+        match Result.flatten(payload) {
+            case Ok(json) => {
+                let str = Util.Json.toPrettyString(4, json);
+                println(str)
+            }
+            case Err(msg) => println("Error: ${msg}")
+        } 

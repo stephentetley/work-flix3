@@ -8,3 +8,4 @@ authors     = ["Stephen Tetley <stephen.tetley@gmail.com>"]
 
 [dependencies]
 "github:stephentetley/sheetio" = { version = "0.1.0", security = "unrestricted" }
+"github:stephentetley/flix-path" = { version = "0.1.0", security = "unrestricted" }
