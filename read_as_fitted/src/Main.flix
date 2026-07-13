@@ -1,3 +1,5 @@
+use Abort.runWithIO
+use Fs.FileWrite
 use Util.Json.ToJson
 // Copyright 2026 Stephen Tetley
 //
@@ -17,7 +19,7 @@ use SheetIO.Usermodel.Workbook.Workbook
 
 use Util.Json
 
-pub def main(): Unit \ IO = 
+pub def main(): Unit \ IO + FileWrite = 
     println("ReadAsFitted");
     let path = "../../test_data/as_fitted/test1_as_fitted.xlsx";
     let outpath = Interop.Path.swapExtension("json", path);
@@ -33,10 +35,12 @@ pub def main(): Unit \ IO =
                 ac ::: ans1
             }, Nil) |> Result.map(ToJson.toJson)
         } with SheetIO.Usermodel.Workbook.runReadOnlyXssf(path, None);   
-        match Result.flatten(payload) {
-            case Ok(json) => {
+        match (Result.flatten(payload), outpath) {
+            case (Ok(json), Some(outp)) => {
                 let str = Util.Json.toPrettyString(4, json);
+                discard runWithIO(_ -> FileWrite.write(str = str, outp));
                 println(str)
             }
-            case Err(msg) => println("Error: ${msg}")
+            case (Err(msg), _) => println("Error: ${msg}")
+            case (_, None) => println("Bad outpath")
         } 
