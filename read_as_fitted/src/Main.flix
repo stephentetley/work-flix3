@@ -22,6 +22,7 @@ use Util.Json
 pub def main(): Unit \ IO + FileWrite = 
     println("ReadAsFitted");
     let path = "../../test_data/as_fitted/test1_as_fitted.xlsx";
+    let filename = Interop.Path.getFileName(path) |> Option.getWithDefault("[error]"); 
     let outpath = Interop.Path.swapExtension("json", path);
     println(outpath);
     SheetIOExtras.setMinInflateRatio(-1.0f64);
@@ -30,7 +31,7 @@ pub def main(): Unit \ IO + FileWrite =
             let n = Workbook.getNumberOfSheets();
             println("Number of sheets: ${n}");
             Workbook.foldSheets(ac -> {
-                let ans = ReadAsFitted.ReadTestSheet.parseTestSheet(path, checklistDate);
+                let ans = ReadAsFitted.ReadTestSheet.parseTestSheet(filename, checklistDate);
                 let ans1 = List.map(ReadAsFitted.Base.circuitToJson, ans);
                 ac ::: ans1
             }, Nil) |> Result.map(ToJson.toJson)
@@ -39,7 +40,7 @@ pub def main(): Unit \ IO + FileWrite =
             case (Ok(json), Some(outp)) => {
                 let str = Util.Json.toPrettyString(4, json);
                 discard runWithIO(_ -> FileWrite.write(str = str, outp));
-                println(str)
+                println("Wrote: ${outp}")
             }
             case (Err(msg), _) => println("Error: ${msg}")
             case (_, None) => println("Bad outpath")

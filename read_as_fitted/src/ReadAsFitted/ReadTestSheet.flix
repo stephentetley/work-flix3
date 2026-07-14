@@ -14,15 +14,16 @@
 
 pub mod ReadAsFitted.ReadTestSheet {
     
+    use EffectExtras.Alt
     use SheetIO.Usermodel.Sheet
     use SheetIO.Common.CellAddress
     use ReadAsFitted.Base.{TestHeader, RawAsFittedCircuit}
     use SheetIOExtras.{getCellStringValue, addr, cs_r}
 
 
-    pub def parseTestSheet(fileName: String, checklistDate: String): List[RawAsFittedCircuit] \ Sheet = 
-        let isTestSheet = getCellStringValue(addr("F1")) == "TEST SHEET";
-        let isOldFormat = getCellStringValue(addr("B2")) == "Site Name:" and getCellStringValue(addr("B5")) == "CIRCUIT/CABLE DETAILS";
+    pub def parseTestSheet(fileName: String, checklistDate: String): List[RawAsFittedCircuit] \ Sheet + Alt = 
+        let isTestSheet = EffectExtras.Alt.optional(_ -> getCellStringValue(addr("F1"))) == Some("TEST SHEET");
+        let isOldFormat = EffectExtras.Alt.optional(_ -> getCellStringValue(addr("B2"))) == Some("Site Name:") and EffectExtras.Alt.optional(_ -> getCellStringValue(addr("B5"))) == Some("CIRCUIT/CABLE DETAILS");
         let columns = List#{ "C", "D", "E", "F", "G", "H", "I", "J", "K"};
         if (isTestSheet) {
             let header = if(isOldFormat) readOldFormatHeader(fileName, checklistDate) else readHeader(fileName, checklistDate);

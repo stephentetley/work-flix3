@@ -43,7 +43,7 @@ pub mod SheetIOExtras {
 
     /// SheetIO TODO - must make this simple
     pub def getCellStringValue(cellAddr: CellAddress): String \ Sheet = 
-        Sheet.getStringCellValue(cellAddr) |> Option.getWithDefault("")
+        Sheet.getStringCellValue(cellAddr) |> Option.getWithDefault("") |> String.trim
 
 
 
