@@ -14,16 +14,23 @@
 
 
 pub mod SheetIOExtras {
+    use ToFlix.toFlix
+    use SheetIOExtras.alt_fromOption
+    use SheetIO.Usermodel.ReadWorkbook
 
     use EffectExtras.Alt
+    use SheetIO.Usermodel.{Cell}
+    use SheetIO.Usermodel.ReadWorkbook
     use SheetIO.Usermodel.ReadSheet
     use SheetIO.Usermodel.ReadCell.ReadCell
     use SheetIO.Common.CellAddress
+    use SheetIO.Common.CellReference
 
     import java.lang.{Exception => JException}
     import java.lang.{IllegalArgumentException => JIllegalArgumentException}
     import org.apache.poi.openxml4j.util.{ZipSecureFile => JZipSecureFile}
     import org.apache.poi.ss.util.{WorkbookUtil => JWorkbookUtil}
+    import org.apache.poi.ss.util.{CellAddress => JCellAddress}
 
     pub def setMinInflateRatio(ratio: Float64): Unit \ IO = 
         JZipSecureFile.setMinInflateRatio(ratio)
@@ -39,15 +46,28 @@ pub mod SheetIOExtras {
     pub def cs_r(c: String, r: Int32): CellAddress = CellAddress.createFromString("${c}${r}")
 
 
-    pub def alt_runWithDefault(d: a, f: Unit -> a \ ef): a \ ef - Alt =
-        EffectExtras.Alt.handleWithResult(f)() |> Result.getWithDefault(d)
 
     /// SheetIO TODO - must make this simple
     pub def getCellStringValue(cellAddr: CellAddress): String \ ReadSheet + Alt = 
         let cell = ReadSheet.getCell(cellAddr);
         SheetIO.Usermodel.ReadCell.runReadCell(cell, _ -> ReadCell.getCellValueString() |> String.trim)
 
+    pub def getCellByReference(cr: CellReference): Cell \ ReadWorkbook + Alt = 
+        let sheetname = CellReference.getSheetName(cr) |> alt_fromOption;
+        let sheet = ReadWorkbook.getSheet(sheetname);
+        let celladdr = cellReference_toCellAddress(cr);
+        SheetIO.Usermodel.ReadSheet.runReadSheet(sheet, _ -> {
+            ReadSheet.getCell(celladdr)
+        })
 
 
+    pub def alt_fromOption(x: Option[a]): a \ Alt = match x {
+        case Some(a)    => a 
+        case None       => Alt.failure("fromOption - Some")
+    }
 
+    pub def cellReference_toCellAddress(cr: CellReference): CellAddress = 
+        let cr1 = ToJava.toJava(cr);
+        let ans = unsafe IO { new JCellAddress(cr1) };
+        ToFlix.toFlix(ans)
 }

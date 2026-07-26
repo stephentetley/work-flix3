@@ -14,15 +14,19 @@
 
 pub mod ReadAsFitted.ReadGeneralChecklist {
 
-    use EffectExtras.Alt
+    use EffectExtras.Alt.Alt
+    use EffectExtras.Fail.Fail
     use SheetIO.Usermodel.ReadWorkbook
+    use SheetIO.Usermodel.ReadCell
+    use SheetIO.Common.CellReference
     use SheetIOExtras.{getCellStringValue, addr, cs_r}
 
-    pub def getCheckListDateString(): String \ ReadWorkbook = 
-        let ws = ReadWorkbook.getSheet("General Checklist");
-        run { SheetIO.Usermodel.ReadSheet.runReadSheet(ws, _ -> 
-            getCellStringValue(addr("B8"))
-        )} with SheetIOExtras.alt_runWithDefault("1970")
+    pub def getCheckListDateString(): String \ ReadWorkbook + Fail - Alt = 
+        run {
+            let cellref = CellReference.createFromString("'General Checklist'!B8");
+            let cell = SheetIOExtras.getCellByReference(cellref);
+            SheetIO.Usermodel.ReadCell.runReadCell(cell, ReadCell.getCellValueString)
+        } with EffectExtras.Alt.runWithFail
 
 
 }
