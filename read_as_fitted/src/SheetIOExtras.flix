@@ -16,7 +16,8 @@
 pub mod SheetIOExtras {
 
     use EffectExtras.Alt
-    use SheetIO.Usermodel.Sheet
+    use SheetIO.Usermodel.ReadSheet
+    use SheetIO.Usermodel.ReadCell.ReadCell
     use SheetIO.Common.CellAddress
 
     import java.lang.{Exception => JException}
@@ -42,26 +43,11 @@ pub mod SheetIOExtras {
         EffectExtras.Alt.handleWithResult(f)() |> Result.getWithDefault(d)
 
     /// SheetIO TODO - must make this simple
-    pub def getCellStringValue(cellAddr: CellAddress): String \ Sheet = 
-        Sheet.getStringCellValue(cellAddr) |> Option.getWithDefault("") |> String.trim
+    pub def getCellStringValue(cellAddr: CellAddress): String \ ReadSheet + Alt = 
+        let cell = ReadSheet.getCell(cellAddr);
+        SheetIO.Usermodel.ReadCell.runReadCell(cell, _ -> ReadCell.getCellValueString() |> String.trim)
 
 
 
-    pub def validateSheetName(s: String): Bool = 
-        try {
-            let _ = unsafe IO { JWorkbookUtil.validateSheetName(s) };
-            true
-        } catch {
-            case _: JIllegalArgumentException => false
-        }
-
-
-    pub def createSafeSheetName(s: String): Result[String, String] = 
-        try {
-            let ans = unsafe IO { JWorkbookUtil.createSafeSheetName(s) };
-            Ok(ans)
-        } catch {
-            case _: JIllegalArgumentException => Err("")
-        }
 
 }

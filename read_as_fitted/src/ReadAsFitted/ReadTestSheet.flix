@@ -15,13 +15,13 @@
 pub mod ReadAsFitted.ReadTestSheet {
     
     use EffectExtras.Alt
-    use SheetIO.Usermodel.Sheet
+    use SheetIO.Usermodel.ReadSheet
     use SheetIO.Common.CellAddress
     use ReadAsFitted.Base.{TestHeader, RawAsFittedCircuit}
     use SheetIOExtras.{getCellStringValue, addr, cs_r}
 
 
-    pub def parseTestSheet(fileName: String, checklistDate: String): List[RawAsFittedCircuit] \ Sheet + Alt = 
+    pub def parseTestSheet(fileName: String, checklistDate: String): List[RawAsFittedCircuit] \ ReadSheet + Alt = 
         let isTestSheet = EffectExtras.Alt.optional(_ -> getCellStringValue(addr("F1"))) == Some("TEST SHEET");
         let isOldFormat = EffectExtras.Alt.optional(_ -> getCellStringValue(addr("B2"))) == Some("Site Name:") and EffectExtras.Alt.optional(_ -> getCellStringValue(addr("B5"))) == Some("CIRCUIT/CABLE DETAILS");
         let columns = List#{ "C", "D", "E", "F", "G", "H", "I", "J", "K"};
@@ -32,8 +32,8 @@ pub mod ReadAsFitted.ReadTestSheet {
                 columns)
         } else List#{}
 
-    pub def readHeader(fileName: String, checklistDate: String): TestHeader \ Sheet = 
-        let tabName = Sheet.getSheetName();
+    pub def readHeader(fileName: String, checklistDate: String): TestHeader \ ReadSheet + Alt = 
+        let tabName = ReadSheet.getSheetName();
         let siteName = getCellStringValue(addr("B3"));
         let dbOrPanelNumber = getCellStringValue(addr("E3"));
         let testDate = getCellStringValue(addr("J3"));
@@ -59,8 +59,8 @@ pub mod ReadAsFitted.ReadTestSheet {
         }
         
 
-    pub def readOldFormatHeader(fileName: String, checklistDate: String): TestHeader \ Sheet = 
-        let tabName = Sheet.getSheetName();
+    pub def readOldFormatHeader(fileName: String, checklistDate: String): TestHeader \ ReadSheet + Alt = 
+        let tabName = ReadSheet.getSheetName();
         let siteName = getCellStringValue(addr("B3"));
         let dbOrPanelNumber = "";
         let testDate = getCellStringValue(addr("J3"));
@@ -83,7 +83,7 @@ pub mod ReadAsFitted.ReadTestSheet {
             dbOrPanelIncomerDetails = dbOrPanelIncomerDetails
         }
  
-    def readCircuit(col: String, header: TestHeader): Option[RawAsFittedCircuit] \ Sheet = 
+    def readCircuit(col: String, header: TestHeader): Option[RawAsFittedCircuit] \ ReadSheet + Alt = 
         let cableNum = getCellStringValue(cs_r(col, 10));
         let fedFrom = getCellStringValue(cs_r(col, 11));
         let circuitRefAndPhase = getCellStringValue(cs_r(col, 12));
@@ -116,7 +116,7 @@ pub mod ReadAsFitted.ReadTestSheet {
                 | header
             })
 
-        def readOldFormatCircuit(col: String, header: TestHeader): Option[RawAsFittedCircuit] \ Sheet =
+        def readOldFormatCircuit(col: String, header: TestHeader): Option[RawAsFittedCircuit] \ ReadSheet + Alt =
             let cableNum = getCellStringValue(cs_r(col, 6));
             let fedFrom = getCellStringValue(cs_r(col, 7));
             let circuitRefAndPhase = getCellStringValue(cs_r(col, 8));

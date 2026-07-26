@@ -15,7 +15,7 @@ use Util.Json.ToJson
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use SheetIO.Usermodel.Workbook.Workbook
+use SheetIO.Usermodel.ReadWorkbook.ReadWorkbook
 
 use Util.Json
 
@@ -28,14 +28,14 @@ pub def main(): Unit \ IO + FileWrite =
     SheetIOExtras.setMinInflateRatio(-1.0f64);
     let payload = run { 
             let checklistDate = ReadAsFitted.ReadGeneralChecklist.getCheckListDateString();
-            let n = Workbook.getNumberOfSheets();
+            let n = ReadWorkbook.getNumberOfSheets();
             println("Number of sheets: ${n}");
-            Workbook.foldSheets(ac -> {
+            ReadWorkbook.foldSheets(ac -> {
                 let ans = ReadAsFitted.ReadTestSheet.parseTestSheet(filename, checklistDate);
                 let ans1 = List.map(ReadAsFitted.Base.circuitToJson, ans);
                 ac ::: ans1
             }, Nil) |> Result.map(ToJson.toJson)
-        } with SheetIO.Usermodel.Workbook.runReadOnlyXssf(path, None);   
+        } with SheetIO.Usermodel.ReadWorkbook.runReadWorkbookXssf(path, None);   
         match (Result.flatten(payload), outpath) {
             case (Ok(json), Some(outp)) => {
                 let str = Util.Json.toPrettyString(4, json);
