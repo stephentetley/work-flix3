@@ -17,14 +17,15 @@ pub mod ReadAsFitted.ReadTestSheet {
     use EffectExtras.Alt
     use SheetIO.Usermodel.ReadSheet
     use SheetIO.Common.CellAddress
+    use SheetIO.Common.CellAddress.ToCellAddress
     use ReadAsFitted.Base.{TestHeader, RawAsFittedCircuit}
-    use SheetIOExtras.{getCellStringValue, addr, cs_r}
+    
 
 
     pub def parseTestSheet(fileName: String, checklistDate: String): List[RawAsFittedCircuit] \ ReadSheet + Alt = 
-        let isTestSheet = EffectExtras.Alt.optional(_ -> getCellStringValue(addr("F1"))) == Some("TEST SHEET");
-        let isOldFormat = EffectExtras.Alt.optional(_ -> getCellStringValue(addr("B2"))) == Some("Site Name:") and EffectExtras.Alt.optional(_ -> getCellStringValue(addr("B5"))) == Some("CIRCUIT/CABLE DETAILS");
-        let columns = List#{ "C", "D", "E", "F", "G", "H", "I", "J", "K"};
+        let isTestSheet = SheetIO.Usermodel.ReadSheet.getCellValueString("F1") == "TEST SHEET";
+        let isOldFormat = SheetIO.Usermodel.ReadSheet.getCellValueString("B2") == "Site Name:" and SheetIO.Usermodel.ReadSheet.getCellValueString("B5") == "CIRCUIT/CABLE DETAILS";
+        let columns = List#{"C", "D", "E", "F", "G", "H", "I", "J", "K"};
         if (isTestSheet) {
             let header = if(isOldFormat) readOldFormatHeader(fileName, checklistDate) else readHeader(fileName, checklistDate);
             List.filterMap(col -> 
@@ -34,16 +35,16 @@ pub mod ReadAsFitted.ReadTestSheet {
 
     pub def readHeader(fileName: String, checklistDate: String): TestHeader \ ReadSheet + Alt = 
         let tabName = ReadSheet.getSheetName();
-        let siteName = getCellStringValue(addr("B3"));
-        let dbOrPanelNumber = getCellStringValue(addr("E3"));
-        let testDate = getCellStringValue(addr("J3"));
-        let sheetNumber = getCellStringValue(addr("K3"));
-        let aibRef = getCellStringValue(addr("B5"));
-        let hasTpOrSp = getCellStringValue(addr("E4")) == "TP / SP";
-        let tpOrSp = if (hasTpOrSp) getCellStringValue(addr("E5")) else "";
-        let locationCell = if (hasTpOrSp) addr("F5") else addr("E5");
-        let location = if (hasTpOrSp) getCellStringValue(locationCell) else getCellStringValue(addr("E5"));
-        let dbOrPanelIncomerDetails = getCellStringValue(addr("B7"));
+        let siteName = SheetIO.Usermodel.ReadSheet.getCellValueString("B3") ;
+        let dbOrPanelNumber = SheetIO.Usermodel.ReadSheet.getCellValueString("E3");
+        let testDate = SheetIO.Usermodel.ReadSheet.getCellValueString("J3");
+        let sheetNumber = SheetIO.Usermodel.ReadSheet.getCellValueString("K3");
+        let aibRef = SheetIO.Usermodel.ReadSheet.getCellValueString("B5");
+        let hasTpOrSp = SheetIO.Usermodel.ReadSheet.getCellValueString("E4") == "TP / SP";
+        let tpOrSp = if (hasTpOrSp) SheetIO.Usermodel.ReadSheet.getCellValueString("E5") else "";
+        let locationCell = if (hasTpOrSp) "F5" else "E5";
+        let location = if (hasTpOrSp) SheetIO.Usermodel.ReadSheet.getCellValueString(locationCell) else SheetIO.Usermodel.ReadSheet.getCellValueString("E5");
+        let dbOrPanelIncomerDetails = SheetIO.Usermodel.ReadSheet.getCellValueString("B7");
         {
             fileName = fileName,
             tabName = tabName,
@@ -61,13 +62,13 @@ pub mod ReadAsFitted.ReadTestSheet {
 
     pub def readOldFormatHeader(fileName: String, checklistDate: String): TestHeader \ ReadSheet + Alt = 
         let tabName = ReadSheet.getSheetName();
-        let siteName = getCellStringValue(addr("B3"));
+        let siteName = SheetIO.Usermodel.ReadSheet.getCellValueString("B3");
         let dbOrPanelNumber = "";
-        let testDate = getCellStringValue(addr("J3"));
-        let sheetNumber = getCellStringValue(addr("K3"));
-        let aibRef = getCellStringValue(addr("E5"));
+        let testDate = SheetIO.Usermodel.ReadSheet.getCellValueString("J3");
+        let sheetNumber = SheetIO.Usermodel.ReadSheet.getCellValueString("K3");
+        let aibRef = SheetIO.Usermodel.ReadSheet.getCellValueString("E5");
         let tpOrSp = "";
-        let location = getCellStringValue(addr("F3"));
+        let location = SheetIO.Usermodel.ReadSheet.getCellValueString("F3");
         let dbOrPanelIncomerDetails = "";
         {
             fileName = fileName,
@@ -84,9 +85,10 @@ pub mod ReadAsFitted.ReadTestSheet {
         }
  
     def readCircuit(col: String, header: TestHeader): Option[RawAsFittedCircuit] \ ReadSheet + Alt = 
-        let cableNum = getCellStringValue(cs_r(col, 10));
-        let fedFrom = getCellStringValue(cs_r(col, 11));
-        let circuitRefAndPhase = getCellStringValue(cs_r(col, 12));
+        def addr(row) = "${col}${row}";
+        let cableNum = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(10));
+        let fedFrom = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(11));
+        let circuitRefAndPhase = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(12));
             
         if (cableNum == "" and fedFrom == "" and circuitRefAndPhase == "")
             None
@@ -96,30 +98,31 @@ pub mod ReadAsFitted.ReadTestSheet {
                 +cableNum = cableNum, 
                 +fedFrom = fedFrom, 
                 +circuitRefAndPhase = circuitRefAndPhase,
-                +circuitDescription = getCellStringValue(cs_r(col, 13)),
-                +circuitType = getCellStringValue(cs_r(col, 14)),
-                +cableType = getCellStringValue(cs_r(col, 15)),
-                +installationMethod = getCellStringValue(cs_r(col, 16)), 
-                +cableLength = getCellStringValue(cs_r(col, 17)),
-                +numOfCoresCSA = getCellStringValue(cs_r(col, 18)),
-                +circuitBreakerOrFuseRating = getCellStringValue(cs_r(col, 26)),
-                +circuitBreakerBSAndTypeNum = getCellStringValue(cs_r(col, 27)),
-                +circuitBreakerManufacturerAndRefNum = getCellStringValue(cs_r(col, 28)),
-                +rcdManufacturerAndType = getCellStringValue(cs_r(col, 31)),
-                +load = getCellStringValue(cs_r(col, 34)),
-                +ratingKW = getCellStringValue(cs_r(col, 35)),
-                +fullLoadCurrentA = getCellStringValue(cs_r(col, 36)),
-                +circuitVoltageV = getCellStringValue(cs_r(col, 58)),
-                +circuitCurrentA = getCellStringValue(cs_r(col, 59)),
-                +testDate = getCellStringValue(cs_r(col, 60)),
-                +comments = getCellStringValue(cs_r(col, 61))
+                +circuitDescription = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(13)),
+                +circuitType = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(14)),
+                +cableType = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(15)),
+                +installationMethod = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(16)), 
+                +cableLength = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(17)),
+                +numOfCoresCSA = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(18)),
+                +circuitBreakerOrFuseRating = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(26)),
+                +circuitBreakerBSAndTypeNum = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(27)),
+                +circuitBreakerManufacturerAndRefNum = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(28)),
+                +rcdManufacturerAndType = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(31)),
+                +load = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(34)),
+                +ratingKW = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(35)),
+                +fullLoadCurrentA = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(36)),
+                +circuitVoltageV = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(58)),
+                +circuitCurrentA = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(59)),
+                +testDate = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(60)),
+                +comments = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(61))
                 | header
             })
 
         def readOldFormatCircuit(col: String, header: TestHeader): Option[RawAsFittedCircuit] \ ReadSheet + Alt =
-            let cableNum = getCellStringValue(cs_r(col, 6));
-            let fedFrom = getCellStringValue(cs_r(col, 7));
-            let circuitRefAndPhase = getCellStringValue(cs_r(col, 8));
+            def addr(row) = "${col}${row}";
+            let cableNum = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(6));
+            let fedFrom = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(7));
+            let circuitRefAndPhase = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(8));
             
             if (cableNum == "" and fedFrom == "" and circuitRefAndPhase == "")
                 None
@@ -129,23 +132,23 @@ pub mod ReadAsFitted.ReadTestSheet {
                     +cableNum = cableNum, 
                     +fedFrom = fedFrom, 
                     +circuitRefAndPhase = circuitRefAndPhase,
-                    +circuitDescription = getCellStringValue(cs_r(col, 9)),
-                    +circuitType = getCellStringValue(cs_r(col, 10)),
-                    +cableType = getCellStringValue(cs_r(col, 11)),
-                    +installationMethod = getCellStringValue(cs_r(col, 12)), 
-                    +cableLength = getCellStringValue(cs_r(col, 13)),
-                    +numOfCoresCSA = getCellStringValue(cs_r(col, 14)),
-                    +circuitBreakerOrFuseRating = getCellStringValue(cs_r(col, 22)),
-                    +circuitBreakerBSAndTypeNum = getCellStringValue(cs_r(col, 23)),
-                    +circuitBreakerManufacturerAndRefNum = getCellStringValue(cs_r(col, 24)),
-                    +rcdManufacturerAndType = getCellStringValue(cs_r(col, 27)),
-                    +load = getCellStringValue(cs_r(col, 30)),
-                    +ratingKW = getCellStringValue(cs_r(col, 31)),
-                    +fullLoadCurrentA = getCellStringValue(cs_r(col, 32)),
-                    +circuitVoltageV = getCellStringValue(cs_r(col, 56)),
-                    +circuitCurrentA = getCellStringValue(cs_r(col, 57)),
-                    +testDate = getCellStringValue(cs_r(col, 58)),
-                    +comments = getCellStringValue(cs_r(col, 59))
+                    +circuitDescription = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(9)),
+                    +circuitType = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(10)),
+                    +cableType = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(11)),
+                    +installationMethod = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(12)), 
+                    +cableLength = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(13)),
+                    +numOfCoresCSA = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(14)),
+                    +circuitBreakerOrFuseRating = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(22)),
+                    +circuitBreakerBSAndTypeNum = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(23)),
+                    +circuitBreakerManufacturerAndRefNum = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(24)),
+                    +rcdManufacturerAndType = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(27)),
+                    +load = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(30)),
+                    +ratingKW = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(31)),
+                    +fullLoadCurrentA = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(32)),
+                    +circuitVoltageV = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(56)),
+                    +circuitCurrentA = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(57)),
+                    +testDate = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(58)),
+                    +comments = SheetIO.Usermodel.ReadSheet.getCellValueString(addr(59))
                     | header
             })
 

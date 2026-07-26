@@ -25,17 +25,20 @@ pub def main(): Unit \ IO + FileWrite =
     let filename = Interop.Path.getFileName(path) |> Option.getWithDefault("[error]"); 
     let outpath = Interop.Path.swapExtension("json", path);
     println(outpath);
-    SheetIOExtras.setMinInflateRatio(-1.0f64);
     let payload = run { 
             let checklistDate = ReadAsFitted.ReadGeneralChecklist.getCheckListDateString();
             let n = ReadWorkbook.getNumberOfSheets();
             println("Number of sheets: ${n}");
-            ReadWorkbook.foldSheets(ac -> {
-                let ans = ReadAsFitted.ReadTestSheet.parseTestSheet(filename, checklistDate);
-                let ans1 = List.map(ReadAsFitted.Base.circuitToJson, ans);
-                ac ::: ans1
+            SheetIOExtras.foldSheets((sheet, ac) -> {
+                match SheetIO.Usermodel.ReadSheet.runReadSheetWithResult(sheet, _ -> ReadAsFitted.ReadTestSheet.parseTestSheet(filename, checklistDate)) {
+                    case Err(_) => ac
+                    case Ok(ans) => {
+                        let ans1 = List.map(ReadAsFitted.Base.circuitToJson, ans);
+                        ac ::: ans1
+                    }
+                }
             }, Nil) |> Result.map(ToJson.toJson)
-        } with SheetIO.Usermodel.ReadWorkbook.runReadWorkbookXssf(path, None);   
+        } with SheetIO.Usermodel.ReadWorkbook.runReadWorkbookXssf(path, Some(-1.0f64));   
         match (Result.flatten(payload), outpath) {
             case (Ok(json), Some(outp)) => {
                 let str = Util.Json.toPrettyString(4, json);
